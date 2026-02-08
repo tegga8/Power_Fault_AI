@@ -8,8 +8,11 @@ def generate_current(
     duration=1,
     harmonics=[(3, 0.05), (5, 0.03)],
     noise=0.01,
-    drift=0.0
+    drift=0.0,
+    rng=None
 ):
+    if rng is None:
+        rng = np.random.default_rng()
     t = np.arange(0, duration, 1/fs)
     i = np.sin(2 * np.pi * f * t)
 
@@ -19,7 +22,7 @@ def generate_current(
     # degradation drift (thermal, load stress)
     i *= (1 + drift * t)
 
-    i += noise * np.random.randn(len(t))
+    i += noise * rng.standard_normal(len(t))
     return t, i
 
 def generate_current_signal(
@@ -28,10 +31,13 @@ def generate_current_signal(
     duration=10,
     harmonics=None,
     noise=0.01,
-    drift=0.0
+    drift=0.0,
+    rng=None
 ):
     if harmonics is None:
         harmonics = []
+    if rng is None:
+        rng = np.random.default_rng()
 
     t = np.arange(0, duration, 1/fs)
     signal = np.sin(2 * np.pi * f * t)
@@ -43,7 +49,7 @@ def generate_current_signal(
     signal *= (1 + drift * t)
 
     # noise (switching + sensor)
-    signal += noise * np.random.randn(len(t))
+    signal += noise * rng.standard_normal(len(t))
 
     return signal
 
@@ -71,5 +77,4 @@ def generate_current_signal(
 # plt.plot(t,degrading)
 # plt.subplot(3,1,3)
 # plt.plot(t,fault)
-
 

@@ -1,7 +1,6 @@
-#%%
 import numpy as np
 from scipy.fft import fft
-import signals
+
 
 def extract_features(signal, fs):
     rms = np.sqrt(np.mean(signal**2))
@@ -9,28 +8,13 @@ def extract_features(signal, fs):
     std = np.std(signal)
 
     fft_mag = np.abs(fft(signal))
-    fft_mag = fft_mag[:len(fft_mag)//2]
+    fft_mag = fft_mag[: len(fft_mag) // 2]
+    harmonic_band = fft_mag[2:10]
+    fundamental = fft_mag[1] + 1e-12
+    thd = np.sum(harmonic_band) / fundamental
 
-    thd = np.sum(fft_mag[2:10]) / fft_mag[1]
-
-    return [rms, peak, std, thd]
-
-X = []
-y = []
-fs = 10000000
-
-for s in signals.normal:
-    print(s,end= " ")
-    X.append(extract_features(s, fs))
-    y.append(0)  # normal
-
-for s in signals.degrading:
-    X.append(extract_features(s, fs))
-    y.append(1)  # degrading
-
-for s in signals.fault:
-    X.append(extract_features(s, fs))
-    y.append(2)  # fault
+    return np.array([rms, peak, std, thd])
 
 
-print(X)
+def build_feature_matrix(windows, fs):
+    return np.array([extract_features(window, fs) for window in windows])
